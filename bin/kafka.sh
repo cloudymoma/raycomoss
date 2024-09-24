@@ -1,13 +1,12 @@
 #!/bin/bash -ex
 
+pwd=$(pwd)
+source $pwd/bin/common.sh
+
 # cluster parameters
-project_id=du-hast-mich
 cluster_name=dingo-kafka
-region=us-central1
 cpu=3 #vCPU
 mem=4 #GB
-net=default
-subnet=default
 
 # topic parameters
 topic_id=dingo-topic
