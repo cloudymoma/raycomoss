@@ -18,6 +18,10 @@ __enable_api() {
     gcloud services enable managedflink.googleapis.com compute.googleapis.com
 }
 
+__gcloud-managed-flink-client() {
+    echo "Y" | gcloud components install managed-flink-client
+}
+
 __gcs_permission() {
     gcloud storage buckets add-iam-policy-binding gs://${gcs_flink} \
         --member="serviceAccount:gmf-${project_num}-default@gcp-sa-managedflink-wi.iam.gserviceaccount.com" \
@@ -54,6 +58,7 @@ __main() {
             api)
                 __enable_api
                 __gcs_permission
+                __gcloud-managed-flink-client
                 ;;
             deploy|d)
                 __deploy
