@@ -15,8 +15,13 @@ __network() {
         --enable-private-ip-google-access
 }
 
+__gcs() {
+    gcloud storage buckets create gs://${gcs_flink} --location=US
+}
+
 __main() {
     __network
+    __gcs
 }
 
 __main $@
