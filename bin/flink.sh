@@ -5,10 +5,12 @@ source $pwd/bin/common.sh
 
 deployment=dingo-flink
 max_slots=4
-job_name=dingo_wordcount
+job_name=dingostream
 uuid=$(uuidgen)
 min_parallelism=1
 max_parallelism=4
+
+job_jar=dingostream-1.0-SNAPSHOT.jar
 
 __usage() {
     echo "Usage: ./bin/flink.sh deploy"
@@ -38,7 +40,10 @@ __deploy() {
 }
 
 __job() {
-    gcloud alpha managed-flink jobs create $pwd/lib/WordCount.jar \
+    cd $pwd/src/flink/dingostream && \
+        mvn clean package
+
+    gcloud alpha managed-flink jobs create $pwd/src/flink/dingostream/target/$job_jar \
         --name=$job_name-$uuid \
         --location=$region \
         --deployment=$deployment \
