@@ -18,8 +18,17 @@
 
 package bindiego;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
+
+import org.apache.flink.api.common.eventtime.WatermarkStrategy;
+import org.apache.flink.api.common.serialization.SimpleStringSchema;
+
+import org.apache.flink.connector.kafka.source.KafkaSource;
+import org.apache.flink.connector.kafka.source.enumerator.initializer.OffsetsInitializer; 
 
 /**
  * Skeleton for a Flink DataStream Job.
@@ -34,6 +43,8 @@ import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
  * method, change the respective entry in the POM.xml file (simply search for 'mainClass').
  */
 public class DataStreamJob {
+
+	private static final Logger LOG = LoggerFactory.getLogger(DataStreamJob.class);
 
 	public static void main(String[] args) throws Exception {
 		// Sets up the execution environment, which is the main entry point
@@ -60,11 +71,30 @@ public class DataStreamJob {
 		 *
 		 */
 
-		// Create a DataStream from a collection
-		DataStream<String> dataStream = env.fromElements("Hello", "World");
+		 // Kafka connector: https://nightlies.apache.org/flink/flink-docs-release-1.19/docs/connectors/datastream/kafka/
 
-		// Apply a transformation to the DataStream
-		dataStream.print();
+		 // Create a Kafka source
+		 KafkaSource<String> source = KafkaSource.<String>builder()
+			.setBootstrapServers("localhost:9092") // Replace with your Kafka brokers
+			.setTopics("your-kafka-topic")  // Replace with your Kafka topic name
+			.setGroupId("my-consumer-group") // Replace with your consumer group ID
+			.setStartingOffsets(OffsetsInitializer.earliest()) // Read from the beginning
+			.setValueOnlyDeserializer(new SimpleStringSchema())
+			.build();
+
+		// Create a DataStream from the Kafka source
+		DataStream<String> stream = env.fromSource(source, WatermarkStrategy.noWatermarks(), "Kafka Source");
+
+		// Process the JSON data
+		stream.map(json -> {
+			// 1. Parse the JSON string
+			// 2. Extract relevant fields
+			// 3. Perform your data processing logic here
+			
+			// Example: Simply print the JSON string
+			LOG.debug(json);
+			return json; 
+		});
 
 		// Execute program, beginning computation.
 		env.execute("Dingo Flink Java Skeleton");
