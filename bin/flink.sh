@@ -10,10 +10,13 @@ uuid=$(uuidgen)
 min_parallelism=1
 max_parallelism=4
 
+FLINK=`which flink`
 job_jar=dingostream-1.0-SNAPSHOT.jar
+main_class=DataStreamJob.Class
+DINGO_LOG_LEVEL=DEBUG
 
 __usage() {
-    echo "Usage: ./bin/flink.sh deploy"
+    echo "Usage: ./bin/flink.sh {api,deploy,package,run,runlocal}"
 }
 
 __enable_api() {
@@ -39,9 +42,13 @@ __deploy() {
         --max-slots=$max_slots
 }
 
-__job() {
+__pkg() {
     cd $pwd/src/flink/dingostream && \
         mvn clean package
+}
+
+__job() {
+    __pkg
 
     gcloud alpha managed-flink jobs create $pwd/src/flink/dingostream/target/$job_jar \
         --name=$job_name-$uuid \
@@ -52,6 +59,12 @@ __job() {
         --min-parallelism=$min_parallelism \
         --max-parallelism=$max_parallelism \
         -- --output gs://$gcs_flink/output/
+}
+
+__run_local() {
+    __pkg
+
+    $FLINK run -c $main_class $job_jar
 }
 
 __main() {
@@ -68,8 +81,14 @@ __main() {
             deploy|d)
                 __deploy
                 ;;
+            package|pkg)
+                __pkg
+                ;;
             job|run)
                 __job
+                ;;
+            runlocal)
+                __run_local
                 ;;
             *)
                 __usage
