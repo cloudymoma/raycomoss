@@ -18,11 +18,18 @@
 
 package bindiego;
 
+import java.time.Duration;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.apache.flink.api.java.utils.ParameterTool;
+
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
+import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
+import org.apache.flink.streaming.api.functions.sink.filesystem.rollingpolicies.DefaultRollingPolicy;
+import org.apache.flink.streaming.api.windowing.assigners.TumblingEventTimeWindows;
 
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.api.common.serialization.SimpleStringSchema;
@@ -47,9 +54,18 @@ public class DataStreamJob {
 	private static final Logger LOG = LoggerFactory.getLogger(DataStreamJob.class);
 
 	public static void main(String[] args) throws Exception {
+		// parse the parameters
+        final ParameterTool params = ParameterTool.fromArgs(args);
+        final long windowSize = params.getLong("windowSize", 2000);
+        final long rate = params.getLong("rate", 3L);
+        final boolean fileOutput = params.has("output");
+
 		// Sets up the execution environment, which is the main entry point
 		// to building Flink applications.
 		final StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
+
+		// make parameters available in the web interface
+        env.getConfig().setGlobalJobParameters(params);
 
 		/*
 		 * Here, you can start creating your execution plan for Flink.

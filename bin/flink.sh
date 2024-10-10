@@ -12,8 +12,7 @@ max_parallelism=4
 
 FLINK=`which flink`
 job_jar=dingostream-1.0-SNAPSHOT.jar
-main_class=DataStreamJob.Class
-DINGO_LOG_LEVEL=DEBUG
+main_class=bindiego.DataStreamJob
 
 __usage() {
     echo "Usage: ./bin/flink.sh {api,deploy,package,run,runlocal}"
@@ -64,7 +63,8 @@ __job() {
 __run_local() {
     __pkg
 
-    $FLINK run -c $main_class $job_jar
+    $FLINK run -Denv.DINGO_LOG_LEVEL=DEBUG \
+        -c $main_class $pwd/src/flink/dingostream/target/$job_jar
 }
 
 __main() {
