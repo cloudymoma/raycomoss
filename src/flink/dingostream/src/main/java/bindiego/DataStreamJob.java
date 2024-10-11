@@ -88,14 +88,14 @@ public class DataStreamJob {
 		 */
 
 		 // Kafka connector: https://nightlies.apache.org/flink/flink-docs-release-1.19/docs/connectors/datastream/kafka/
-
 		 // Create a Kafka source
 		 KafkaSource<String> source = KafkaSource.<String>builder()
-			.setBootstrapServers("localhost:9092") // Replace with your Kafka brokers
-			.setTopics("your-kafka-topic")  // Replace with your Kafka topic name
-			.setGroupId("my-consumer-group") // Replace with your consumer group ID
+			.setBootstrapServers("bootstrap.dingo-kafka.us-central1.managedkafka.du-hast-mich.cloud.goog:9092") // Replace with your Kafka brokers
+			.setTopics("dingo-topic")  // Replace with your Kafka topic name
+			//.setGroupId("my-consumer-group") // Replace with your consumer group ID
 			.setStartingOffsets(OffsetsInitializer.earliest()) // Read from the beginning
 			.setValueOnlyDeserializer(new SimpleStringSchema())
+			.setProperty("partition.discovery.interval.ms", "10000") // discover new partitions per 10 seconds
 			.build();
 
 		// Create a DataStream from the Kafka source

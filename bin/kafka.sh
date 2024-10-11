@@ -14,6 +14,8 @@ topic_partitions=3
 topic_rep_factor=2
 topic_config=compression.type=producer
 
+BOOTSTRAP=bootstrap.${cluster_name}.us-central1.managedkafka.${project_id}.cloud.goog:9092
+
 __usage() {
     echo "Usage: ./bin/kafka.sh {create|(delete,del,d)|monitor <opration id>|(list,ls,l)|view}"
 }
@@ -88,6 +90,28 @@ __topic_del() {
         --location=${region}
 }
 
+__test() {
+    echo "List Kafka Topics"
+    kafka-topics.sh --list \
+        --bootstrap-server $BOOTSTRAP \
+        --command-config conf/kafka-client.properties
+
+    echo "Write a message to topic ${topic_id}"
+    echo "hello world" | kafka-console-producer.sh --topic ${topic_id} \
+        --bootstrap-server $BOOTSTRAP --producer.config conf/kafka-client.properties
+
+    echo "Consumre the message from topic ${topic_id}"
+     kafka-console-consumer.sh --topic ${topic_id} --from-beginning \
+        --bootstrap-server $BOOTSTRAP --consumer.config conf/kafka-client.properties
+}
+
+__producer_perf() {
+    echo "Producer performance test against topic ${topic_id}"
+    kafka-producer-perf-test.sh --topic ${topic_id} --num-records 1000000 \
+        --throughput -1 --print-metrics --record-size 1024 \
+        --producer-props bootstrap.servers=$BOOTSTRAP --producer.config conf/kafka-client.properties
+}
+
 __main() {
     if [ $# -eq 0 ]
     then 
@@ -123,6 +147,12 @@ __main() {
                 ;;
             topicdel)
                 __topic_del
+                ;;
+            test)
+                __test
+                ;;
+            perf)
+                __producer_perf
                 ;;
             *)
                 __usage
