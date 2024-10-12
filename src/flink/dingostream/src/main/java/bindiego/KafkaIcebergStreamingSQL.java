@@ -41,30 +41,47 @@ import org.apache.flink.connector.kafka.source.enumerator.initializer.OffsetsIni
  * Consume data from Google Managed Kafka
  */
 
-public class KafkaIcebergStreaming {
-    private static final Logger LOG = LoggerFactory.getLogger(KafkaIcebergStreaming.class);
+public class KafkaIcebergStreamingSQL {
+    private static final Logger LOG = LoggerFactory.getLogger(KafkaIcebergStreamingSQL.class);
 
-    public KafkaIcebergStreaming(final StreamExecutionEnvironment env, 
+    public KafkaIcebergStreamingSQL(final StreamExecutionEnvironment env, 
             final KafkaSource source) throws Exception {
 
-		EnvironmentSettings settings = EnvironmentSettings.newInstance().inStreamingMode().build();
+        EnvironmentSettings settings = EnvironmentSettings.newInstance().inStreamingMode().build();
         StreamTableEnvironment tEnv = StreamTableEnvironment.create(env, settings);
 
-        // Create a DataStream from the Kafka source
-		DataStream<String> stream = env.fromSource(source, WatermarkStrategy.noWatermarks(), "Kafka Source");
+        // Create a Kafka table with the structure of streaming data
+        tEnv.executeSql(
+            "create table kafka_table (" +
+            "  user_id BIGINT, " +
+            "  event_name STRING, " +
+            "  `timestamp` TIMESTAMP(3), " +
+            "  WATERMARK FOR `timestamp` AS `timestamp` - INTERVAL '5' SECOND" + 
+            ") WITH (" +
+            "  'connector' = 'kafka'," +
+            "  'topic' = 'dingo-topic'," +
+            "  'properties.bootstrap.servers' = 'bootstrap.dingo-kafka.us-central1.managedkafka.du-hast-mich.cloud.goog:9092'," +
+            "  'format' = 'json'" +
+            ")"
+        );
 
-		// Process the JSON data
-		stream.map(json -> {
-			// 1. Parse the JSON string
-			// 2. Extract relevant fields
-			// 3. Perform your data processing logic here
-			
-			// Example: Simply print the JSON string
-			LOG.debug(json);
-			return json; 
-		});
+        // Create Iceberg tables where you want to write the data
+        tEnv.executeSql(
+            "CREATE TABLE iceberg_table (" +
+            "  user_id BIGINT, " +
+            "  event_name STRING, " +
+            "  `timestamp` TIMESTAMP(3)" +
+            ") WITH (" +
+            "  'connector' = 'iceberg'," +
+            "  'catalog-type' = 'bigquery'," +
+            "  'catalog-name' = 'du-hast-mich'," +
+            "  'warehouse' = 'gs://dingoiceberg/warehouse/'," +
+            "  'database-name' = 'du-hast-mich.raycomoss'," +
+            "  'table-name' = 'fromkafka'" +
+            ")"
+        );
 
-        // Execute program, beginning computation.
-        env.execute("Dingo Flink Java Skeleton");
+        // Insert data into the Iceberg table
+        TableResult output = tEnv.executeSql("INSERT INTO iceberg_table SELECT * FROM kafka_table");
     }
 }

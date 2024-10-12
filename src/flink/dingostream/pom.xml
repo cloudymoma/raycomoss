@@ -32,6 +32,7 @@ under the License.
 		<flink.version>1.19.1</flink.version>
 		<flink.stateful.ver>3.3.0</flink.stateful.ver>
 		<flink.ml.ver>2.2.0</flink.ml.ver>
+		<flink.bq.conn.ver>0.3.0</flink.bq.conn.ver>
 		<target.java.version>1.8</target.java.version>
 		<scala.binary.version>2.12</scala.binary.version>
 		<maven.compiler.source>${target.java.version}</maven.compiler.source>
@@ -113,6 +114,19 @@ under the License.
 			<version>${flink.ml.ver}</version>
 		</dependency>
 		-->
+		<!-- https://mvnrepository.com/artifact/com.google.cloud.flink/flink-connector-bigquery-common -->
+		<dependency>
+			<groupId>com.google.cloud.flink</groupId>
+			<artifactId>flink-connector-bigquery-common</artifactId>
+			<version>${flink.bq.conn.ver}</version>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/com.google.cloud.flink/flink-1.17-connector-bigquery -->
+		<dependency>
+			<groupId>com.google.cloud.flink</groupId>
+			<artifactId>flink-1.17-connector-bigquery</artifactId>
+			<version>${flink.bq.conn.ver}</version>
+		</dependency>
+
 
 		<!-- Add connector dependencies here. They must be in the default scope (compile). -->
 		<dependency>

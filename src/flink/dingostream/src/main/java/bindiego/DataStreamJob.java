@@ -83,5 +83,6 @@ public class DataStreamJob {
 
 		//new BasicStreaming(env, source);
 		new KafkaIcebergStreaming(env, source);
+		//new KafkaIcebergStreamingSQL(env, source);
 	}
 }
