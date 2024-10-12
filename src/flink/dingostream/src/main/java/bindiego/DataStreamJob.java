@@ -60,6 +60,9 @@ public class DataStreamJob {
         final long rate = params.getLong("rate", 3L);
         final boolean fileOutput = params.has("output");
 
+		final String kafkaBootstrapServer = "bootstrap.dingo-kafka.us-central1.managedkafka.du-hast-mich.cloud.goog:9092";
+		final String kafkaTopic = "dingo-topic";
+
 		// Sets up the execution environment, which is the main entry point
 		// to building Flink applications.
 		final StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
@@ -67,52 +70,18 @@ public class DataStreamJob {
 		// make parameters available in the web interface
         env.getConfig().setGlobalJobParameters(params);
 
-		/*
-		 * Here, you can start creating your execution plan for Flink.
-		 *
-		 * Start with getting some data from the environment, like
-		 * 	env.fromSequence(1, 10);
-		 *
-		 * then, transform the resulting DataStream<Long> using operations
-		 * like
-		 * 	.filter()
-		 * 	.flatMap()
-		 * 	.window()
-		 * 	.process()
-		 *
-		 * and many more.
-		 * Have a look at the programming guide:
-		 *
-		 * https://nightlies.apache.org/flink/flink-docs-stable/
-		 *
-		 */
-
-		 // Kafka connector: https://nightlies.apache.org/flink/flink-docs-release-1.19/docs/connectors/datastream/kafka/
-		 // Create a Kafka source
-		 KafkaSource<String> source = KafkaSource.<String>builder()
-			.setBootstrapServers("bootstrap.dingo-kafka.us-central1.managedkafka.du-hast-mich.cloud.goog:9092") // Replace with your Kafka brokers
-			.setTopics("dingo-topic")  // Replace with your Kafka topic name
+		// Kafka connector: https://nightlies.apache.org/flink/flink-docs-release-1.19/docs/connectors/datastream/kafka/
+		// Create a Kafka source
+		KafkaSource<String> source = KafkaSource.<String>builder()
+			.setBootstrapServers(kafkaBootstrapServer) // Replace with your Kafka brokers
+			.setTopics(kafkaTopic)  // Replace with your Kafka topic name
 			//.setGroupId("my-consumer-group") // Replace with your consumer group ID
 			.setStartingOffsets(OffsetsInitializer.earliest()) // Read from the beginning
 			.setValueOnlyDeserializer(new SimpleStringSchema())
 			.setProperty("partition.discovery.interval.ms", "10000") // discover new partitions per 10 seconds
 			.build();
 
-		// Create a DataStream from the Kafka source
-		DataStream<String> stream = env.fromSource(source, WatermarkStrategy.noWatermarks(), "Kafka Source");
-
-		// Process the JSON data
-		stream.map(json -> {
-			// 1. Parse the JSON string
-			// 2. Extract relevant fields
-			// 3. Perform your data processing logic here
-			
-			// Example: Simply print the JSON string
-			LOG.debug(json);
-			return json; 
-		});
-
-		// Execute program, beginning computation.
-		env.execute("Dingo Flink Java Skeleton");
+		new BasicStreaming(env, source);
+		// new KafkaIcebergStreaming(env, source);
 	}
 }
