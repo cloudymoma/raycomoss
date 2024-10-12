@@ -54,8 +54,9 @@ public class KafkaIcebergStreaming {
         tEnv.executeSql(
             "create table kafka_table (" +
             "  user_id BIGINT, " +
-            "  behavior STRING, " +
-            "  `timestamp` TIMESTAMP " +
+            "  event_name STRING, " +
+            "  `timestamp` TIMESTAMP(3), " +
+            "  WATERMARK FOR `timestamp` AS `timestamp` - INTERVAL '5' SECOND" + 
             ") WITH (" +
             "  'connector' = 'kafka'," +
             "  'topic' = 'dingo-topic'," +
@@ -68,13 +69,15 @@ public class KafkaIcebergStreaming {
         tEnv.executeSql(
             "CREATE TABLE iceberg_table (" +
             "  user_id BIGINT, " +
-            "  behavior STRING, " +
-            "  `timestamp` TIMESTAMP" +
+            "  event_name STRING, " +
+            "  `timestamp` TIMESTAMP(3)" +
             ") WITH (" +
             "  'connector' = 'iceberg'," +
-            "  'catalog-name' = 'default'," +
-            "  'database-name' = 'db'," +
-            "  'table-name' = 'table'" +
+            "  'catalog-type' = 'bigquery'," +
+            "  'catalog-name' = 'du-hast-mich'," +
+            "  'warehouse' = 'gs://dingoiceberg/warehouse/'," +
+            "  'database-name' = 'du-hast-mich.raycomoss'," +
+            "  'table-name' = 'fromkafka'" +
             ")"
         );
 

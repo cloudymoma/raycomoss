@@ -29,7 +29,7 @@ under the License.
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<flink.version>1.20.0</flink.version>
+		<flink.version>1.19.1</flink.version>
 		<flink.stateful.ver>3.3.0</flink.stateful.ver>
 		<flink.ml.ver>2.2.0</flink.ml.ver>
 		<target.java.version>1.8</target.java.version>
@@ -39,6 +39,7 @@ under the License.
 		<slf4j.ver>2.0.16</slf4j.ver>
 		<log4j.version>2.17.1</log4j.version>
 		<kafka.conn.ver>3.2.0-1.19</kafka.conn.ver>
+		<iceberg.version>1.6.1</iceberg.version>
 	</properties>
 
 	<repositories>
@@ -114,12 +115,63 @@ under the License.
 		-->
 
 		<!-- Add connector dependencies here. They must be in the default scope (compile). -->
-
 		<dependency>
 			<groupId>org.apache.flink</groupId>
 			<artifactId>flink-connector-kafka</artifactId>
 			<version>${kafka.conn.ver}</version>
 		</dependency>
+
+		<!-- Iceberg -->
+		<dependency>
+			<groupId>org.apache.iceberg</groupId>
+			<artifactId>iceberg-core</artifactId>
+			<version>${iceberg.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.iceberg</groupId>
+			<artifactId>iceberg-common</artifactId>
+			<version>${iceberg.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.iceberg</groupId>
+			<artifactId>iceberg-api</artifactId>
+			<version>${iceberg.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.iceberg</groupId>
+			<artifactId>iceberg-parquet</artifactId>
+			<version>${iceberg.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.iceberg</groupId>
+			<artifactId>iceberg-hive-metastore</artifactId>
+			<version>${iceberg.version}</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>org.apache.iceberg</groupId>
+			<artifactId>iceberg-flink</artifactId>
+			<version>${iceberg.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.iceberg</groupId>
+			<artifactId>iceberg-flink-runtime-1.19</artifactId>
+			<version>${iceberg.version}</version>
+		</dependency>
+		<!--
+		<dependency>
+			<groupId>org.apache.iceberg</groupId>
+			<artifactId>iceberg-flink-runtime</artifactId>
+			<version>${iceberg.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.iceberg</groupId>
+			<artifactId>iceberg-flink-1.17</artifactId> 
+			<version>${iceberg.version}</version>
+		</dependency>
+		-->
 
 		<!-- Add logging framework, to produce console output when running in the IDE. -->
 		<dependency>

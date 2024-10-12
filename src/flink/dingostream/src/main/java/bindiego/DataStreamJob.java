@@ -81,7 +81,7 @@ public class DataStreamJob {
 			.setProperty("partition.discovery.interval.ms", "10000") // discover new partitions per 10 seconds
 			.build();
 
-		new BasicStreaming(env, source);
-		// new KafkaIcebergStreaming(env, source);
+		//new BasicStreaming(env, source);
+		new KafkaIcebergStreaming(env, source);
 	}
 }
