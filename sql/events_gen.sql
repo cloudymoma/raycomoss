@@ -1,9 +1,9 @@
-CREATE TABLE events (
+CREATE OR REPLACE TEMPORARY TABLE events_sink (
   `id` BIGINT,
   `user_id` BIGINT,
   `sequence_number` BIGINT,
   `session_id` STRING,
-  `created_at` TIMESTAMP,
+  `created_at` TIMESTAMP(3),
   `ip_address` STRING,
   `city` STRING,
   `state` STRING,
@@ -44,10 +44,10 @@ WITH (
   'fields.uri.expression' = '#{Internet.url}',
   'fields.event_type.expression' = '#{options.option ''(page_view|add_cart|view_promotion|login|click|submit_review)''}'
 )
-LIKE events (EXCLUDING ALL)
+LIKE events_sink (EXCLUDING ALL)
 ;
 
-INSERT INTO events
+INSERT INTO events_sink
 SELECT * FROM events_gen 
 ;
 

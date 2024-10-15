@@ -1,25 +1,12 @@
-CREATE OR REPLACE TEMPORARY TABLE events_source (
-  `id` BIGINT,
-  `user_id` BIGINT,
-  `sequence_number` BIGINT,
-  `session_id` STRING,
-  `created_at` TIMESTAMP(3),
-  `ip_address` STRING,
-  `city` STRING,
-  `state` STRING,
-  `postal_code` STRING,
-  `browser` STRING,
-  `traffic_source` STRING,
-  `uri` STRING,
-  `event_type` STRING,
-  WATERMARK FOR `created_at` AS `created_at` - INTERVAL '5' SECOND
-)
-WITH (
+create table KafkaSource (
+word string,
+ts as PROCTIME()
+) with (
   'connector' = 'kafka',
   'topic' = 'pa-events',
   'properties.group.id' = 'paevents',
   'properties.bootstrap.servers' = 'bootstrap.pa-kafka.us-central1.managedkafka.forrest-test-project-333203.cloud.goog:9092',
-  'value.format' = 'json',
+  'value.format' = 'raw',
   'properties.security.protocol' = 'SASL_SSL',
   'properties.sasl.mechanism' = 'OAUTHBEARER',
   'properties.sasl.login.callback.handler.class' = 'com.google.cloud.hosted.kafka.auth.GcpLoginCallbackHandler',
@@ -28,6 +15,15 @@ WITH (
 )
 ;
 
-INSERT INTO bqms.ecommerce.events
-SELECT * FROM events_source
-;
+CREATE TABLE ksink (
+word string,
+ts TIMESTAMP(3)
+) WITH (
+    'connector' = 'filesystem',
+    'path' = 'gs://paflink/dingo/',
+    'format' = 'csv'
+);
+
+insert into ksink
+select word, ts
+from KafkaSource;

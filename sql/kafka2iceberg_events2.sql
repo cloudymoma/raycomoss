@@ -28,6 +28,35 @@ WITH (
 )
 ;
 
-INSERT INTO bqms.ecommerce.events
+
+CREATE OR REPLACE TABLE events_iceberg (
+  `id` BIGINT,
+  `user_id` BIGINT,
+  `sequence_number` BIGINT,
+  `session_id` STRING,
+  `created_at` TIMESTAMP(3),
+  `ip_address` STRING,
+  `city` STRING,
+  `state` STRING,
+  `postal_code` STRING,
+  `browser` STRING,
+  `traffic_source` STRING,
+  `uri` STRING,
+  `event_type` STRING
+)
+WITH (
+  'connector' = 'iceberg',
+  'catalog-type' = 'bigquery',  
+  'catalog-name' = 'forrest-test-project-333203',
+  'catalog-impl' = 'org.apache.iceberg.gcp.bigquery.BigQueryMetastoreCatalog',
+  'gcp_project' = 'forrest-test-project-333203',
+  'gcp_location' = 'us-central1',
+  'warehouse' = 'gs://paiceberg/',
+  'database' = 'forrest-test-project-333203.ecommerce',
+  'table' = 'events'
+)
+;
+
+INSERT INTO events_iceberg
 SELECT * FROM events_source
 ;
