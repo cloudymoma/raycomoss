@@ -1,0 +1,29 @@
+create table KafkaSource (
+word string,
+ts as PROCTIME()
+) with (
+  'connector' = 'kafka',
+  'topic' = 'pa-events',
+  'properties.group.id' = 'paevents',
+  'properties.bootstrap.servers' = 'bootstrap.pa-kafka.us-central1.managedkafka.forrest-test-project-333203.cloud.goog:9092',
+  'value.format' = 'raw',
+  'properties.security.protocol' = 'SASL_SSL',
+  'properties.sasl.mechanism' = 'OAUTHBEARER',
+  'properties.sasl.login.callback.handler.class' = 'com.google.cloud.hosted.kafka.auth.GcpLoginCallbackHandler',
+  'properties.sasl.jaas.config' = 'org.apache.kafka.common.security.oauthbearer.OAuthBearerLoginModule required;',
+  'scan.startup.mode' = 'earliest-offset'
+)
+;
+
+CREATE TABLE ksink (
+word string,
+ts TIMESTAMP(3)
+) WITH (
+    'connector' = 'filesystem',
+    'path' = 'gs://paflink/dingo/',
+    'format' = 'csv'
+);
+
+insert into ksink
+select word, ts
+from KafkaSource;
